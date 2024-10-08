@@ -57,7 +57,8 @@ enum rebx_param_type{
     REBX_TYPE_UINT32,
     REBX_TYPE_ORBIT,
     REBX_TYPE_ODE,
-    REBX_TYPE_VEC3D
+    REBX_TYPE_VEC3D,
+    REBX_TYPE_TURB
 };
 
 /**
@@ -258,6 +259,18 @@ struct rebx_extras {
     struct rebx_node* registered_params;            ///< Linked list of rebx_params with all the parameter names registered with their type (for type safety)
     struct rebx_node* allocated_forces;             ///< For memory management
     struct rebx_node* allocated_operators;          ///< For memory management
+};
+
+struct rebx_turb_modes{
+    int nmodes;
+    int* m;
+    double* xi;
+    double* rc;
+    double* phik;
+    double* sigmak;
+    double* Omegak;
+    double* Deltatk;
+    double* t0k;
 };
 
 /****************************************

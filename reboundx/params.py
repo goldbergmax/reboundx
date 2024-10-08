@@ -4,7 +4,7 @@ if sys.version_info[:2] >= (3, 8):
     from collections.abc import MutableMapping
 else:
     from collections import MutableMapping
-from .extras import Param, Node, Force, Operator, Extras, REBX_CTYPES
+from .extras import Param, Node, Force, Operator, Extras, REBX_CTYPES, Turbulence
 from . import clibreboundx
 from ctypes import byref, c_double, c_int, c_int32, c_int64, c_uint, c_uint32, c_longlong, c_char_p, POINTER, cast
 from ctypes import c_void_p, memmove, sizeof, addressof
@@ -82,6 +82,10 @@ class Params(MutableMapping):
                 raise AttributeError("REBOUNDx Error: Parameter '{0}' must be assigned a rebound.ODE object.".format(key))
             clibreboundx.rebx_set_param_pointer(self.rebx, byref(self.ap), c_char_p(key.encode('ascii')), byref(value))
         if ctype == c_void_p:
+            clibreboundx.rebx_set_param_pointer(self.rebx, byref(self.ap), c_char_p(key.encode('ascii')), byref(value))
+        if ctype == Turbulence:
+            if not isinstance(value, Turbulence):
+                raise AttributeError("REBOUNDx Error: Parameter '{0}' must be assigned a Turbulence object.".format(key))
             clibreboundx.rebx_set_param_pointer(self.rebx, byref(self.ap), c_char_p(key.encode('ascii')), byref(value))
 
     def __delitem__(self, key):

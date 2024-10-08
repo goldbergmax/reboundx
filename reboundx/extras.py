@@ -365,8 +365,29 @@ Interpolator._fields_ = [  ("interpolation", c_int),
 
 INTERPOLATION_TYPE = {"none":0, "spline":1}
 
+class Turbulence(Structure):
+    _fields_ = [("nmodes", c_int),
+                ("m", POINTER(c_int)),
+                ("xi", POINTER(c_double)),
+                ("rc", POINTER(c_double)),
+                ("phik", POINTER(c_double)),
+                ("sigmak", POINTER(c_double)),
+                ("Omegak", POINTER(c_double)),
+                ("Deltatk", POINTER(c_double)),
+                ("t0k", POINTER(c_double))]
+    def __init__(self, nmodes):
+        self.nmodes = nmodes
+        self.m = (c_int * nmodes)()
+        self.xi = (c_double * nmodes)()
+        self.rc = (c_double * nmodes)()
+        self.phik = (c_double * nmodes)()
+        self.sigmak = (c_double * nmodes)()
+        self.Omegak = (c_double * nmodes)()
+        self.Deltatk = (c_double * nmodes)()
+        self.t0k = (c_double * nmodes)()
+
 # This list keeps pairing from C rebx_param_type enum to ctypes type 1-to-1. Derive the required mappings from it
-REBX_C_TO_CTYPES = [["REBX_TYPE_NONE", None], ["REBX_TYPE_DOUBLE", c_double], ["REBX_TYPE_INT",c_int], ["REBX_TYPE_POINTER", c_void_p], ["REBX_TYPE_FORCE", Force], ["REBX_TYPE_UNIT32", c_uint32], ["REBX_TYPE_ORBIT", rebound.Orbit], ["REBX_TYPE_ODE", rebound.ODE], ["REBX_TYPE_VEC3D", rebound.Vec3d]]
+REBX_C_TO_CTYPES = [["REBX_TYPE_NONE", None], ["REBX_TYPE_DOUBLE", c_double], ["REBX_TYPE_INT",c_int], ["REBX_TYPE_POINTER", c_void_p], ["REBX_TYPE_FORCE", Force], ["REBX_TYPE_UNIT32", c_uint32], ["REBX_TYPE_ORBIT", rebound.Orbit], ["REBX_TYPE_ODE", rebound.ODE], ["REBX_TYPE_VEC3D", rebound.Vec3d], ["REBX_TYPE_TURB", Turbulence]]
 REBX_CTYPES = {} # maps int value of rebx_param_type enum to ctypes type
 REBX_C_PARAM_TYPES = {} # maps string of rebx_param_type enum to int
 for i, pair in enumerate(REBX_C_TO_CTYPES):
