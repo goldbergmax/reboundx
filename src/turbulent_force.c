@@ -82,22 +82,22 @@ void rebx_update_modes(struct reb_simulation* const sim, struct rebx_force* cons
     double *outer_edge = rebx_get_param(rebx, force->ap, "turb_outer_edge");
     int *max_m_ptr = rebx_get_param(rebx, force->ap, "turb_max_m");
     if (modes == NULL){
-        reb_error(sim, "No modes found in rebx_turbulent_forces.\n");
+        reb_simulation_error(sim, "No modes found in rebx_turbulent_forces.\n");
         return;
     }
     if (h0 == NULL || flaring_index == NULL){
-        reb_error(sim, "h0 or flaring_index not set in rebx_turbulent_forces.\n");
+        reb_simulation_error(sim, "h0 or flaring_index not set in rebx_turbulent_forces.\n");
         return;
     }
     if (inner_edge == NULL || outer_edge == NULL){
-        reb_error(sim, "inner_edge or outer_edge not set in rebx_turbulent_forces.\n");
+        reb_simulation_error(sim, "inner_edge or outer_edge not set in rebx_turbulent_forces.\n");
         return;
     }
     int max_m = 96;
     if (max_m_ptr != NULL){
         max_m = *max_m_ptr;
         if (max_m < 0){
-            reb_error(sim, "max_m must be positive in rebx_turbulent_forces.\n");
+            reb_simulation_error(sim, "max_m must be positive in rebx_turbulent_forces.\n");
             return;
         }
     }
@@ -124,12 +124,12 @@ void rebx_turbulent_forces(struct reb_simulation* const sim, struct rebx_force* 
     double *gamma = rebx_get_param(rebx, force->ap, "turb_gamma");
     double *Gamma = rebx_get_param(rebx, force->ap, "turb_Gamma");
     if (gamma == NULL || Gamma == NULL){
-        reb_error(sim, "gamma or Gamma not set in rebx_turbulent_forces.\n");
+        reb_simulation_error(sim, "gamma or Gamma not set in rebx_turbulent_forces.\n");
         return;
     }
     for (int i=0; i<N; i++){
         if (modes == NULL){
-            reb_error(sim, "No modes found in rebx_turbulent_forces.\n");
+            reb_simulation_error(sim, "No modes found in rebx_turbulent_forces.\n");
             return;
         }
         if (i>0 && modes != NULL){
@@ -138,7 +138,7 @@ void rebx_turbulent_forces(struct reb_simulation* const sim, struct rebx_force* 
             int err=0;
             struct reb_orbit o = reb_orbit_from_particle_err(sim->G, particles[i], com, &err);
             if (err){
-                reb_error(sim, "An error occured during the orbit calculation in rebx_stochastic_forces.\n");
+                reb_simulation_error(sim, "An error occured during the orbit calculation in rebx_stochastic_forces.\n");
                 return;
             }
 
