@@ -136,7 +136,7 @@ void rebx_turbulent_forces(struct reb_simulation* const sim, struct rebx_force* 
             const struct reb_particle p = particles[i];
 
             int err=0;
-            struct reb_orbit o = reb_tools_particle_to_orbit_err(sim->G, particles[i], com, &err);
+            struct reb_orbit o = reb_orbit_from_particle_err(sim->G, particles[i], com, &err);
             if (err){
                 reb_error(sim, "An error occured during the orbit calculation in rebx_stochastic_forces.\n");
                 return;
@@ -165,7 +165,7 @@ void rebx_turbulent_forces(struct reb_simulation* const sim, struct rebx_force* 
             particles[i].ay += force_prefac*(turbulent_force_r*dy/dr + turbulent_force_phi*dx/dr);
 
 
-		    com = reb_get_com_of_pair(com, p);
+		    com = reb_particle_com_of_pair(com, p);
         }
     }
 }
