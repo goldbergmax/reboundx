@@ -180,7 +180,7 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     const double* const mmax_ptr = rebx_get_param(sim->extras, force->ap, "tIm_max_mass");
 
     int err=0;
-    struct reb_orbit o = reb_tools_particle_to_orbit_err(sim->G, *p, *source, &err);
+    struct reb_orbit o = reb_orbit_from_particle_err(sim->G, *p, *source, &err);
   
     const double a0 = o.a;
     const double e0 = o.e;
