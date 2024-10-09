@@ -47,6 +47,8 @@ void rebx_calculate_jacobi_masses(const struct reb_particle* const ps, double* c
 Effect helper functions
 ****************************************/
 const double rebx_calculate_planet_trap(const double r, const double dedge, const double hedge);
+const double rebx_calculate_disk_surface_density(const double sd0, const double r, const double s, const double bump_amp, const double bump_pos, const double bump_width, const double inner_edge, const double inner_edge_width);
+const double rebx_calculate_disk_surface_density_index(const double r, const double s, const double bump_amp, const double bump_pos, const double bump_width, const double inner_edge, const double inner_edge_width);
 
 // TLu 11/8/22
 struct reb_vec3d rebx_tools_spin_and_orbital_angular_momentum(const struct rebx_extras* const rebx);
