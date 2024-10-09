@@ -108,12 +108,12 @@ const double rebx_calculate_corotation_torque(const double sd_ind, const double 
     const double xs = 1.1/pow(adi_ind, 0.25) * sqrt(mass_ratio/h);
     const double p_nu = 2.0/3.0*sqrt(xs*xs*xs/(2.0 * M_PI * alpha_visc * h * h));
     const double p_chi = 1.5*p_nu;
-    const double F_p_nu = F_sat(p_nu);
-    const double F_p_chi = F_sat(p_chi);
-    const double G_p_nu = G_cutoff(p_nu);
-    const double G_p_chi = G_cutoff(p_chi);
-    const double K_p_nu = K_cutoff(p_nu);
-    const double K_p_chi = K_cutoff(p_chi);
+    const double F_p_nu = rebx_calculate_F_sat(p_nu);
+    const double F_p_chi = rebx_calculate_F_sat(p_chi);
+    const double G_p_nu = rebx_calculate_G_cutoff(p_nu);
+    const double G_p_chi = rebx_calculate_G_cutoff(p_chi);
+    const double K_p_nu = rebx_calculate_K_cutoff(p_nu);
+    const double K_p_chi = rebx_calculate_K_cutoff(p_chi);
 
     const double Gammahsbaro = 1.1*(1.5 - sd_ind)/adi_ind;
     const double Gammalinbaro = 0.7*(1.5 - sd_ind)/adi_ind;
