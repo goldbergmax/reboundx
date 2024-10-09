@@ -111,6 +111,11 @@ void rebx_register_default_params(struct rebx_extras* rebx){
     rebx_register_param(rebx, "tIm_scale_height_1", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_surface_density_1", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_surface_density_exponent", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "tIm_max_mass", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "tIm_bump_position", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "tIm_bump_width", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "tIm_bump_height", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "tIm_alpha_visc", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "ye_c", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "ye_body_density", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "ye_lstar", REBX_TYPE_DOUBLE);
@@ -346,6 +351,10 @@ struct rebx_force* rebx_load_force(struct rebx_extras* const rebx, const char* n
     }
     else if (strcmp(name, "lense_thirring") == 0){
         force->update_accelerations = rebx_lense_thirring;
+        force->force_type = REBX_FORCE_VEL;
+    }
+    else if (strcmp(name, "full_type_I") == 0){
+        force->update_accelerations = rebx_modify_orbits_with_all_type_I_torques;
         force->force_type = REBX_FORCE_VEL;
     }
     else{
