@@ -80,12 +80,12 @@ const double rebx_calculate_lindblad_torque(const double sd_ind, const double te
 }
 
 // Function governing the saturation of the corotation torque, PBK11 Eq. 23
-const double F_sat(const double p){
+const double rebx_calculate_F_sat(const double p){
     return 1.0/(1.0 + (p*p/(1.3*1.3)));
 }
 
 // Function governing the cutoff of corotation torque from diffusion, PBK11 Eq. 30
-const double G_cutoff(const double p){
+const double rebx_calculate_G_cutoff(const double p){
     if (p < sqrt(8.0/(45.0*M_PI))){
         return 16.0/25.0*pow(45*M_PI/8.0, 0.75)*pow(p, 1.5);
     }
@@ -95,7 +95,7 @@ const double G_cutoff(const double p){
 }
 
 // Function governing the cutoff of corotation torque from diffusion, PBK11 Eq. 31
-const double K_cutoff(const double p){
+const double rebx_calculate_K_cutoff(const double p){
     if (p < sqrt(28.0/(45.0*M_PI))){
         return 16.0/25.0*pow(45.0*M_PI/28.0, 0.75)*pow(p, 1.5);
     }
