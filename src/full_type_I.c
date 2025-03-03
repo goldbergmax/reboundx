@@ -158,19 +158,20 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     double beta;
     double h0;
     double sd0;
-    double background_sd_ind;
+    double background_sd_ind_in;
+    double background_sd_ind_out;
     double inner_edge_pos = 0.0;
     double inner_edge_width = INFINITY;
     double bumppos = 1.0;
-    double bumpwidth = 1.0;
-    double bumpheight = 0.0;
-    double alpha_visc = 0.0;
+    double bumpwidth = 0.15;
+    double alpha_visc = 1e-4;
     double adi_ind = 1.4;
 
     const double* const inner_edge_pos_ptr = rebx_get_param(sim->extras, force->ap, "ide_position");
     const double* const inner_edge_width_ptr = rebx_get_param(sim->extras, force->ap, "ide_width");
     const double* const sd0_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_1");
-    const double* const background_sd_ind_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_exponent");
+    const double* const background_sd_ind_in_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_exponent_in");
+    const double* const background_sd_ind_out_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_exponent_out");
     const double* const h0_ptr = rebx_get_param(sim->extras, force->ap, "tIm_scale_height_1");
     const double* const beta_ptr = rebx_get_param(sim->extras, force->ap, "tIm_flaring_index");
     const double* const bumppos_ptr = rebx_get_param(sim->extras, force->ap, "tIm_bump_position");
@@ -203,14 +204,14 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     const double r = sqrt(r2);
 
     if (beta_ptr != NULL) beta = *beta_ptr;
-    if (background_sd_ind_ptr != NULL) background_sd_ind = *background_sd_ind_ptr;
+    if (background_sd_ind_in_ptr != NULL) background_sd_ind_in = *background_sd_ind_in_ptr;
+    if (background_sd_ind_out_ptr != NULL) background_sd_ind_out = *background_sd_ind_out_ptr;
     if (sd0_ptr != NULL) sd0 = *sd0_ptr;
     if (h0_ptr != NULL) h0 = *h0_ptr;
     if (inner_edge_pos_ptr != NULL) inner_edge_pos = *inner_edge_pos_ptr;
     if (inner_edge_width_ptr != NULL) inner_edge_width = *inner_edge_width_ptr;
     if (bumppos_ptr != NULL) bumppos = *bumppos_ptr;
     if (bumpwidth_ptr != NULL) bumpwidth = *bumpwidth_ptr;
-    if (bumpheight_ptr != NULL) bumpheight = *bumpheight_ptr;
     if (alpha_visc_ptr != NULL) alpha_visc = *alpha_visc_ptr;
 
     const double h = h0 * pow(r, beta); 
@@ -220,8 +221,8 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     const double ih = inc0/h;
 
     const double G = sim->G;
-    const double sd = rebx_calculate_disk_surface_density(sd0, r, background_sd_ind, bumpheight, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
-    double sd_ind = rebx_calculate_disk_surface_density_index(r, background_sd_ind, bumpheight, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
+    const double sd = rebx_calculate_disk_surface_density(sd0, r, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
+    double sd_ind = rebx_calculate_disk_surface_density_index(sd0, r, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
     // avoid unphyiscally large values of sd_ind
     // might want to remove this later
     // if (sd_ind < -10.0) sd_ind = -10.0;
