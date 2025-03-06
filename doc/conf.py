@@ -200,9 +200,9 @@ master_doc = 'index'
 # built documents.
 #
 # The short X.Y version.
-version = '4.3'
+version = '4.4'
 # The full version, including alpha/beta/rc tags.
-release = '4.3.0'
+release = '4.4.1'
 
 # General information about the project.
 project = u"REBOUNDx ({0})".format(release)
@@ -443,4 +443,4 @@ texinfo_documents = [
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {'python': ('https://docs.python.org/3', None)}
