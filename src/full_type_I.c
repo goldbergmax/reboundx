@@ -63,8 +63,8 @@
 #include "rebxtools.h"
 
 // wave damping timescale from Tanaka & Ward 2004
-const double rebx_calculate_wave_timescale(const double G, const double sd, const double r, const double ms, const double mp, const double sma, const double h2){    
-    const double t_wave = (sqrt(ms*ms*ms)*h2*h2)/(mp*sd*sqrt(sma*G));
+const double rebx_calculate_wave_timescale(const double G, const double sd, const double r, const double ms, const double mp, const double h2){    
+    const double t_wave = (sqrt(ms*ms*ms)*h2*h2)/(mp*sd*sqrt(r*G));
     return t_wave;
 }
 
@@ -228,7 +228,7 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     // if (sd_ind < -10.0) sd_ind = -10.0;
     // if (sd_ind > 10.0) sd_ind = 10.0;
     const double temp_ind = 1.0 - 2.0*beta;
-    const double wave = rebx_calculate_wave_timescale(G, sd, r, ms, mp, a0, h2);
+    const double wave = rebx_calculate_wave_timescale(G, sd, r, ms, mp, h2);
     const double invtau_mig = 1.0/rebx_calculate_type_I_migration_timescale(wave, sd_ind, temp_ind, adi_ind, e0, inc0, h, alpha_visc, mp/ms);
     const double tau_e = rebx_calculate_ecc_damping_timescale(wave, eh, ih);
     const double tau_inc = rebx_calculate_inc_damping_timescale(wave, eh, ih);
