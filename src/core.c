@@ -110,6 +110,7 @@ void rebx_register_default_params(struct rebx_extras* rebx){
     rebx_register_param(rebx, "tIm_flaring_index", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_scale_height_1", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_surface_density_1", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "tIm_surface_density_exponent", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_surface_density_exponent_in", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_surface_density_exponent_out", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "tIm_max_mass", REBX_TYPE_DOUBLE);
