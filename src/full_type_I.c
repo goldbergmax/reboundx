@@ -154,6 +154,22 @@ const double rebx_calculate_inc_damping_timescale(const double wave, const doubl
     return t_i;
 }
 
+const double rebx_calculate_ftrans(const double r, const double mig_sign){
+    const double a = 0.45;
+    const double b = 20;
+    const double c = 0.2;
+    const double rref = 0.1*1.13;
+    const double w = 0.1*0.12;
+    double ftrans = 1.0;
+    if(mig_sign > 0.0){
+        ftrans = 1 + a*(tanh((r-rref)/w)-1) - b*((r-(1+c*w)*rref)/w)*exp(-((r-rref)*(r-rref)/(w*w)));
+    }
+    else{
+        ftrans = 1 + a*(tanh((r-rref)/w)-1) + b*((r-(1+c*w)*rref)/w)*exp(-((r-rref)*(r-rref)/(w*w)));
+    }
+    return ftrans;
+}
+
 static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(struct reb_simulation* const sim, struct rebx_force* const force, struct reb_particle* p, struct reb_particle* source){
     double beta;
     double h0;
@@ -229,7 +245,9 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     // if (sd_ind > 10.0) sd_ind = 10.0;
     const double temp_ind = 1.0 - 2.0*beta;
     const double wave = rebx_calculate_wave_timescale(G, sd, r, ms, mp, h2);
-    const double invtau_mig = 1.0/rebx_calculate_type_I_migration_timescale(wave, sd_ind, temp_ind, adi_ind, e0, inc0, h, alpha_visc, mp/ms);
+    double invtau_mig = 1.0/rebx_calculate_type_I_migration_timescale(wave, sd_ind, temp_ind, adi_ind, e0, inc0, h, alpha_visc, mp/ms);
+    const double ftrans = rebx_calculate_ftrans(r, invtau_mig);
+    invtau_mig *= ftrans;
     const double tau_e = rebx_calculate_ecc_damping_timescale(wave, eh, ih);
     const double tau_inc = rebx_calculate_inc_damping_timescale(wave, eh, ih);
 
