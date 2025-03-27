@@ -76,7 +76,7 @@ static void rebx_random_normal2(struct reb_simulation* r, double* n0, double* n1
 void rebx_update_modes(struct reb_simulation* const sim, struct rebx_force* const force){
     struct rebx_extras* const rebx = sim->extras;
     struct rebx_turb_modes* modes = rebx_get_param(rebx, force->ap, "turb_modes");
-    double *h0 = rebx_get_param(rebx, force->ap, "turb_h0");
+    double *h0 = rebx_get_param(rebx, force->ap, "turb_scale_height_1");
     double *flaring_index = rebx_get_param(rebx, force->ap, "turb_flaring_index");
     double *inner_edge = rebx_get_param(rebx, force->ap, "turb_inner_edge");
     double *outer_edge = rebx_get_param(rebx, force->ap, "turb_outer_edge");
@@ -105,7 +105,7 @@ void rebx_update_modes(struct reb_simulation* const sim, struct rebx_force* cons
         if (sim->t >= modes->t0k[i] + modes->Deltatk[i]){
             modes->xi[i] = reb_random_normal(sim, 1.0);
             modes->m[i] = (int)pow(10, reb_random_uniform(sim, 0.0, log10(max_m)));
-            modes->rc[i] = reb_random_uniform(sim, *inner_edge, *outer_edge);
+            modes->rc[i] = (*inner_edge)*pow((*outer_edge)/(*inner_edge), reb_random_uniform(sim, 0.0, 1.0));
             modes->phik[i] = reb_random_uniform(sim, 0.0, 2*M_PI);
             modes->sigmak[i] = M_PI*modes->rc[i]/(4*((double)modes->m[i]));
             modes->Omegak[i] = sqrt(sim->G*sim->particles[0].m/(modes->rc[i]*modes->rc[i]*modes->rc[i]));
@@ -121,10 +121,74 @@ void rebx_turbulent_forces(struct reb_simulation* const sim, struct rebx_force* 
     struct reb_particle com = particles[0];
     rebx_update_modes(sim, force);
     struct rebx_turb_modes* modes = rebx_get_param(rebx, force->ap, "turb_modes");
-    double *gamma = rebx_get_param(rebx, force->ap, "turb_gamma");
-    double *Gamma = rebx_get_param(rebx, force->ap, "turb_Gamma");
-    if (gamma == NULL || Gamma == NULL){
-        reb_simulation_error(sim, "gamma or Gamma not set in rebx_turbulent_forces.\n");
+    double flaring_index;
+    double h0;
+    double sd0;
+    double background_sd_ind_in;
+    double background_sd_ind_out;
+    double inner_edge_pos = 0.0;
+    double inner_edge_width = INFINITY;
+    double bumppos;
+    double bumpwidth;
+    double alpha_visc;
+    const double* const inner_edge_pos_ptr = rebx_get_param(sim->extras, force->ap, "ide_position");
+    const double* const inner_edge_width_ptr = rebx_get_param(sim->extras, force->ap, "ide_width");
+    const double* const sd0_ptr = rebx_get_param(sim->extras, force->ap, "turb_surface_density_1");
+    const double* const background_sd_ind_in_ptr = rebx_get_param(sim->extras, force->ap, "turb_surface_density_exponent_in");
+    const double* const background_sd_ind_out_ptr = rebx_get_param(sim->extras, force->ap, "turb_surface_density_exponent_out");
+    const double* const h0_ptr = rebx_get_param(sim->extras, force->ap, "turb_scale_height_1");
+    const double* const flaring_index_ptr = rebx_get_param(sim->extras, force->ap, "turb_flaring_index");
+    const double* const bumppos_ptr = rebx_get_param(sim->extras, force->ap, "turb_bump_position");
+    const double* const bumpwidth_ptr = rebx_get_param(sim->extras, force->ap, "turb_bump_width");
+    const double* const alpha_visc_ptr = rebx_get_param(sim->extras, force->ap, "turb_alpha_visc");
+    if (flaring_index_ptr != NULL) {
+        flaring_index = *flaring_index_ptr;
+    } else {
+        reb_simulation_error(sim, "No flaring index found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (background_sd_ind_in_ptr != NULL) {
+        background_sd_ind_in = *background_sd_ind_in_ptr;
+    } else {
+        reb_simulation_error(sim, "No inner surface density index found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (background_sd_ind_out_ptr != NULL) {
+        background_sd_ind_out = *background_sd_ind_out_ptr;
+    } else {
+        reb_simulation_error(sim, "No outer surface density index found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (sd0_ptr != NULL) {
+        sd0 = *sd0_ptr;
+    } else {
+        reb_simulation_error(sim, "No surface density found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (h0_ptr != NULL) {
+        h0 = *h0_ptr;
+    } else {
+        reb_simulation_error(sim, "No scale height found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (inner_edge_pos_ptr != NULL) inner_edge_pos = *inner_edge_pos_ptr;
+    if (inner_edge_width_ptr != NULL) inner_edge_width = *inner_edge_width_ptr;
+    if (bumppos_ptr != NULL) {
+        bumppos = *bumppos_ptr;
+    } else {
+        reb_simulation_error(sim, "No bump position found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (bumpwidth_ptr != NULL) {
+        bumpwidth = *bumpwidth_ptr;
+    } else {
+        reb_simulation_error(sim, "No bump width found in rebx_turbulent_forces.\n");
+        return;
+    }
+    if (alpha_visc_ptr != NULL) {
+        alpha_visc = *alpha_visc_ptr;
+    } else {
+        reb_simulation_error(sim, "No alpha visc found in rebx_turbulent_forces.\n");
         return;
     }
     for (int i=0; i<N; i++){
@@ -150,8 +214,12 @@ void rebx_turbulent_forces(struct reb_simulation* const sim, struct rebx_force* 
             const double dz = p.z - com.z;
             const double dr = sqrt(dx*dx + dy*dy + dz*dz);
             const double phi = atan2(dy, dx);
-            
-            const double force_prefac = (*gamma)*(*Gamma)*dr*o.n*o.n;
+            const double sd = rebx_calculate_disk_surface_density(sd0, dr, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
+            const double Gamma = 1000.0*sd*dr*dr/(M_PI*M_PI*com.m);
+            const double h = h0 * pow(dr, flaring_index); 
+            const double gamma = 0.085 * h * sqrt(alpha_visc);
+
+            const double force_prefac = gamma*Gamma*dr*o.n*o.n;
             for (int j=0; j<modes->nmodes; j++){
                 const double expfac = exp(-(dr - modes->rc[j])*(dr - modes->rc[j])/(modes->sigmak[j]*modes->sigmak[j]));
                 const double arg1 = ((double)modes->m[j])*phi - modes->phik[j] - modes->Omegak[j]*(sim->t - modes->t0k[j]); // check with morby about m multiplying everything

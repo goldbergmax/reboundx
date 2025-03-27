@@ -145,12 +145,17 @@ void rebx_register_default_params(struct rebx_extras* rebx){
     rebx_register_param(rebx, "lt_p_hatz", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "lt_c", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "turb_modes", REBX_TYPE_TURB);
-    rebx_register_param(rebx, "turb_gamma", REBX_TYPE_DOUBLE);
-    rebx_register_param(rebx, "turb_Gamma", REBX_TYPE_DOUBLE);
-    rebx_register_param(rebx, "turb_h0", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_scale_height_1", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "turb_flaring_index", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "turb_inner_edge", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "turb_outer_edge", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_surface_density_1", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_surface_density_exponent", REBX_TYPE_DOUBLE);    
+    rebx_register_param(rebx, "turb_surface_density_exponent_in", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_surface_density_exponent_out", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_bump_position", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_bump_width", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "turb_alpha_visc", REBX_TYPE_DOUBLE);
 }
 
 void rebx_register_param(struct rebx_extras* const rebx, const char* name, enum rebx_param_type type){
