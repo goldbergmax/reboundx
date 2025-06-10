@@ -156,7 +156,7 @@ const double rebx_calculate_inc_damping_timescale(const double wave, const doubl
 
 const double rebx_calculate_ftrans(const double r, const double mig_sign, const double inner_edge_pos, const double b){
     const double a = 0.45;
-    const double c = 0.2;
+    const double c = 0.2*1.13;
     const double rref = inner_edge_pos*1.13;
     const double w = inner_edge_pos*0.12;
     double x = (r - rref)/w;
