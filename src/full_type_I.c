@@ -154,18 +154,18 @@ const double rebx_calculate_inc_damping_timescale(const double wave, const doubl
     return t_i;
 }
 
-const double rebx_calculate_ftrans(const double r, const double mig_sign){
+const double rebx_calculate_ftrans(const double r, const double mig_sign, const double inner_edge_pos, const double b){
     const double a = 0.45;
-    const double b = 20;
     const double c = 0.2;
-    const double rref = 0.1*1.13;
-    const double w = 0.1*0.12;
-    double ftrans = 1.0;
+    const double rref = inner_edge_pos*1.13;
+    const double w = inner_edge_pos*0.12;
+    double x = (r - rref)/w;
+    double ftrans;
     if(mig_sign > 0.0){
-        ftrans = 1 + a*(tanh((r-rref)/w)-1) - b*((r-(1+c*w)*rref)/w)*exp(-((r-rref)*(r-rref)/(w*w)));
+        ftrans = 1 + a*(tanh(x)-1) - b*(x - c)*exp(-x*x);
     }
     else{
-        ftrans = 1 + a*(tanh((r-rref)/w)-1) + b*((r-(1+c*w)*rref)/w)*exp(-((r-rref)*(r-rref)/(w*w)));
+        ftrans = 1 + a*(tanh(x)-1) + b*(x - c)*exp(-x*x);
     }
     return ftrans;
 }
@@ -177,14 +177,14 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     double background_sd_ind_in;
     double background_sd_ind_out;
     double inner_edge_pos = 0.0;
-    double inner_edge_width = INFINITY;
+    // double inner_edge_width = INFINITY;
     double bumppos = 1.0;
     double bumpwidth = 0.15;
     double alpha_visc = 1e-4;
     double adi_ind = 1.4;
 
     const double* const inner_edge_pos_ptr = rebx_get_param(sim->extras, force->ap, "ide_position");
-    const double* const inner_edge_width_ptr = rebx_get_param(sim->extras, force->ap, "ide_width");
+    // const double* const inner_edge_width_ptr = rebx_get_param(sim->extras, force->ap, "ide_width");
     const double* const sd0_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_1");
     const double* const background_sd_ind_in_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_exponent_in");
     const double* const background_sd_ind_out_ptr = rebx_get_param(sim->extras, force->ap, "tIm_surface_density_exponent_out");
@@ -225,7 +225,7 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     if (sd0_ptr != NULL) sd0 = *sd0_ptr;
     if (h0_ptr != NULL) h0 = *h0_ptr;
     if (inner_edge_pos_ptr != NULL) inner_edge_pos = *inner_edge_pos_ptr;
-    if (inner_edge_width_ptr != NULL) inner_edge_width = *inner_edge_width_ptr;
+    // if (inner_edge_width_ptr != NULL) inner_edge_width = *inner_edge_width_ptr;
     if (bumppos_ptr != NULL) bumppos = *bumppos_ptr;
     if (bumpwidth_ptr != NULL) bumpwidth = *bumpwidth_ptr;
     if (alpha_visc_ptr != NULL) alpha_visc = *alpha_visc_ptr;
@@ -237,8 +237,8 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     const double ih = inc0/h;
 
     const double G = sim->G;
-    const double sd = rebx_calculate_disk_surface_density(sd0, r, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
-    double sd_ind = rebx_calculate_disk_surface_density_index(sd0, r, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth, inner_edge_pos, inner_edge_width);
+    const double sd = rebx_calculate_disk_surface_density(sd0, r, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth);
+    double sd_ind = rebx_calculate_disk_surface_density_index(sd0, r, background_sd_ind_in, background_sd_ind_out, bumppos, bumpwidth);
     // avoid unphyiscally large values of sd_ind
     // might want to remove this later
     // if (sd_ind < -10.0) sd_ind = -10.0;
@@ -246,10 +246,14 @@ static struct reb_vec3d rebx_calculate_modify_orbits_with_all_type_I_torques(str
     const double temp_ind = 1.0 - 2.0*beta;
     const double wave = rebx_calculate_wave_timescale(G, sd, r, ms, mp, h2);
     double invtau_mig = 1.0/rebx_calculate_type_I_migration_timescale(wave, sd_ind, temp_ind, adi_ind, e0, inc0, h, alpha_visc, mp/ms);
-    const double ftrans = rebx_calculate_ftrans(r, invtau_mig);
+    const double btrans = 20.0;
+    const double ftrans = rebx_calculate_ftrans(r, invtau_mig, inner_edge_pos, btrans);
+    const double etrans = rebx_calculate_ftrans(r, invtau_mig, inner_edge_pos, 0.0);
     invtau_mig *= ftrans;
-    const double tau_e = rebx_calculate_ecc_damping_timescale(wave, eh, ih);
-    const double tau_inc = rebx_calculate_inc_damping_timescale(wave, eh, ih);
+    double tau_e = rebx_calculate_ecc_damping_timescale(wave, eh, ih);
+    double tau_inc = rebx_calculate_inc_damping_timescale(wave, eh, ih);
+    tau_e *= etrans;
+    tau_inc *= etrans;
 
     struct reb_vec3d a = {0};
 

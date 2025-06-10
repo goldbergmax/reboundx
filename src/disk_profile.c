@@ -2,22 +2,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-const double rebx_calculate_disk_surface_density(const double sd0, const double r, const double s_in, const double s_out, const double bump_pos, const double bump_width, const double inner_edge, const double inner_edge_width){
+const double rebx_calculate_disk_surface_density(const double sd0, const double r, const double s_in, const double s_out, const double bump_pos, const double bump_width){
     const double r_bump = (r - bump_pos)/bump_width;
     double ploc = 0.5*(s_out + s_in) + 0.5*(s_out - s_in) * tanh(r_bump);
     double sd = sd0 * pow(r, -ploc);
-    if (inner_edge != 0.0){
-        sd *= 0.5 * (1.0 + tanh((r - inner_edge)/inner_edge_width));
-    }
     return sd;
 }
 
-const double rebx_calculate_disk_surface_density_index(const double sd0, const double r, const double s_in, const double s_out, const double bump_pos, const double bump_width, const double inner_edge, const double inner_edge_width){
+const double rebx_calculate_disk_surface_density_index(const double sd0, const double r, const double s_in, const double s_out, const double bump_pos, const double bump_width){
     const double r_bump = (r - bump_pos)/bump_width;
     double sd_ind = 0.5*(s_out + s_in) + 0.5*(s_out - s_in) * tanh(r_bump); // NEGATIVE power law slope of the gas surface density profile
     sd_ind += 0.5*(s_out - s_in)*r*log(r)/(cosh(r_bump)*cosh(r_bump)*bump_width);
-    if (inner_edge != 0.0){
-        sd_ind += -2.0 * r / inner_edge_width / sinh(2.0 * (r - inner_edge)/inner_edge_width);
-    }
     return sd_ind;
 }
