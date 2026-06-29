@@ -26,7 +26,7 @@
 #define _REBX_REBOUNDX_H
 
 #ifndef M_PI
-#define M_PI 3.1415926535879323846
+#define M_PI 3.14159265358979323846
 #endif
 
 #include <stdint.h>
@@ -448,6 +448,13 @@ void rebx_register_param(struct rebx_extras* const rebx, const char* name, enum 
  */
 struct reb_vec3d rebx_tools_spin_angular_momentum(struct rebx_extras* const rebx);
 
+/**
+ * @brief Calculate spin energy in the simulation of any bodies with spin parameters set (moment of inertia I and angular rotation frequency vector Omega).
+ *
+ * @param rebx Pointer to the rebx_extras instance
+ */
+double rebx_tools_spin_energy(struct rebx_extras* const rebx);
+
 void rebx_simulation_irotate(struct rebx_extras* const rebx, const struct reb_rotation q);
 
 
@@ -563,6 +570,20 @@ double rebx_central_force_potential(struct rebx_extras* const rebx);
  * @return Potential corresponding to the effect from all particles of their additional gravity field harmonics
  */
 double rebx_gravitational_harmonics_potential(struct rebx_extras* const rebx);
+
+struct rebx_tides_dynamical_params
+{
+    double dP;
+    double dE_alpha;
+    double sigma;
+};
+struct rebx_tides_dynamical_mode
+{
+    double real;
+    double imag;
+    char mode;
+};
+struct rebx_tides_dynamical_mode rebx_calculate_tides_dynamical_mode_evolution(double old_real, double old_imag, double dc_tilde, double P, double sigma);
 
 /** @} */
 /** @} */

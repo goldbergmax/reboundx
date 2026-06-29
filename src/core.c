@@ -39,7 +39,7 @@
 #define str(s) #s
 
 const char* rebx_build_str = __DATE__ " " __TIME__; // Date and time build string.
-const char* rebx_version_str = "4.4.1";         // **VERSIONLINE** This line gets updated automatically. Do not edit manually.
+const char* rebx_version_str = "4.6.2";         // **VERSIONLINE** This line gets updated automatically. Do not edit manually.
 const char* rebx_githash_str = STRINGIFY(REBXGITHASH);             // This line gets updated automatically. Do not edit manually.
 
 
@@ -131,7 +131,7 @@ void rebx_register_default_params(struct rebx_extras* rebx){
     rebx_register_param(rebx, "ye_spin_axis_x", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "ye_spin_axis_y", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "ye_spin_axis_z", REBX_TYPE_DOUBLE);
-    rebx_register_param(rebx, "OmegaMag", REBX_TYPE_VEC3D);
+    rebx_register_param(rebx, "OmegaMag", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "Omega", REBX_TYPE_VEC3D);
     rebx_register_param(rebx, "k2", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "I", REBX_TYPE_DOUBLE);
@@ -151,6 +151,19 @@ void rebx_register_default_params(struct rebx_extras* rebx){
     rebx_register_param(rebx, "lt_p_haty", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "lt_p_hatz", REBX_TYPE_DOUBLE);
     rebx_register_param(rebx, "lt_c", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_M_last", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_num_apoapsis", REBX_TYPE_INT);
+    rebx_register_param(rebx, "td_c_imag", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_c_real", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_dP_hat", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_dP_crit", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_EB0", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_E_max", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_E_resid", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_dE_last", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_last_apoapsis", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_drag_coef", REBX_TYPE_DOUBLE);
+    rebx_register_param(rebx, "td_disruption_flag", REBX_TYPE_INT);
 }
 
 void rebx_register_param(struct rebx_extras* const rebx, const char* name, enum rebx_param_type type){
@@ -340,6 +353,7 @@ struct rebx_force* rebx_load_force(struct rebx_extras* const rebx, const char* n
         force->force_type = REBX_FORCE_VEL;
     }
     else if (strcmp(name, "tides_spin") == 0){
+        reb_simulation_warning(rebx->sim, "tides_spin was updated in version 4.5.0 to halve the acceleration from the conservative piece of the tidal potential, reflecting a typo discovered in Eggleton et. al (1998). This warning will be removed in a future version.\n");
         force->update_accelerations = rebx_tides_spin;
         force->force_type = REBX_FORCE_VEL;
     }
@@ -357,6 +371,9 @@ struct rebx_force* rebx_load_force(struct rebx_extras* const rebx, const char* n
     }
     else if (strcmp(name, "full_type_I") == 0){
         force->update_accelerations = rebx_modify_orbits_with_all_type_I_torques;
+    }
+    else if (strcmp(name, "tides_dynamical") == 0){
+        force->update_accelerations = rebx_tides_dynamical;
         force->force_type = REBX_FORCE_VEL;
     }
     else{
@@ -967,7 +984,7 @@ void rebx_free_pointers(struct rebx_extras* rebx){
 }
 
 /**********************************************
- Internal Functions executing forces & ptm each timestep
+ Internal Functions executing forces & pre/post timestep modifications  each timestep
  *********************************************/
 
 void rebx_reset_accelerations(struct reb_particle* const ps, const int N){
@@ -979,12 +996,15 @@ void rebx_reset_accelerations(struct reb_particle* const ps, const int N){
 }
 
 void rebx_additional_forces(struct reb_simulation* sim){
+    if(sim->N_var != 0){
+        reb_simulation_warning(sim, "REBOUNDx: Variational particles have been added to the simulation but are not implemented in REBOUNDx and will not be evolved self-consistently.");
+    }
     struct rebx_extras* rebx = sim->extras;
     struct rebx_node* current = rebx->additional_forces;
     while(current != NULL){
-        /*if(sim->force_is_velocity_dependent && sim->integrator==REB_INTEGRATOR_WHFAST){
-         reb_simulation_warning(sim, "REBOUNDx: Passing a velocity-dependent force to WHFAST. Need to apply as an operator.");
-         }*/
+        if(sim->force_is_velocity_dependent && sim->integrator==REB_INTEGRATOR_WHFAST){
+            reb_simulation_warning(sim, "REBOUNDx: Passing a velocity-dependent force to WHFAST. Need to apply as an operator. See REBOUNDx paper sec 5.1.");
+        }
         struct rebx_force* force = current->object;
         const double N = sim->N - sim->N_var;
         force->update_accelerations(sim, force, sim->particles, N);
@@ -993,6 +1013,9 @@ void rebx_additional_forces(struct reb_simulation* sim){
 }
 
 void rebx_pre_timestep_modifications(struct reb_simulation* sim){
+    if(sim->N_var != 0){
+        reb_simulation_warning(sim, "REBOUNDx: Variational particles have been added to the simulation but are not implemented in REBOUNDx and will not be evolved self-consistently.");
+    }
     struct rebx_extras* rebx = sim->extras;
     struct rebx_node* current = rebx->pre_timestep_modifications;
     const double dt = sim->dt;
@@ -1009,6 +1032,9 @@ void rebx_pre_timestep_modifications(struct reb_simulation* sim){
 }
 
 void rebx_post_timestep_modifications(struct reb_simulation* sim){
+    if(sim->N_var != 0){
+        reb_simulation_warning(sim, "REBOUNDx: Variational particles have been added to the simulation but are not implemented in REBOUNDx and will not be evolved self-consistently.");
+    }
     struct rebx_extras* rebx = sim->extras;
     struct rebx_node* current = rebx->post_timestep_modifications;
     const double dt = sim->dt;

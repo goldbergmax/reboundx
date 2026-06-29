@@ -42,7 +42,7 @@ try:
     ghash = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii")
     ghash_arg = "-DREBXGITHASH="+ghash.strip()
 except:
-    ghash_arg = "-DREBXGITHASH=ecc53659ede5ab6ebcb37c70deb3c11970992cef" #GITHASHAUTOUPDATE
+    ghash_arg = "-DREBXGITHASH=49fd028521361fecd07728faa0b0c829efb2f908" #GITHASHAUTOUPDATE
 
 class build_ext(_build_ext):
     def finalize_options(self):
@@ -57,7 +57,7 @@ class build_ext(_build_ext):
         print("***", rebdir, "***", sitepackagesdir, "***", editable_rebdir, "***")
         self.include_dirs.append(rebdir)
         #self.include_dirs.append(editable_rebdir)
-        sources = [ 'src/integrator_implicit_midpoint.c', 'src/gravitational_harmonics.c', 'src/modify_mass.c', 'src/gas_damping_timescale.c', 'src/tides_spin.c', 'src/gr_potential.c', 'src/track_min_distance.c', 'src/modify_orbits_direct.c', 'src/integrator_euler.c', 'src/lense_thirring.c', 'src/inner_disk_edge.c', 'src/core.c', 'src/gr.c', 'src/type_I_migration.c', 'src/stochastic_forces.c', 'src/interpolation.c', 'src/exponential_migration.c', 'src/radiation_forces.c', 'src/integrate_force.c', 'src/central_force.c', 'src/integrator_rk4.c', 'src/gr_full.c', 'src/full_type_I.c', 'src/disk_profile.c', 'src/integrator_rk2.c', 'src/rebxtools.c', 'src/input.c', 'src/gas_dynamical_friction.c', 'src/yarkovsky_effect.c', 'src/steppers.c', 'src/modify_orbits_forces.c', 'src/linkedlist.c', 'src/tides_constant_time_lag.c', 'src/output.c'],
+        sources = [ 'src/central_force.c', 'src/core.c', 'src/exponential_migration.c', 'src/full_type_I.c', 'src/gas_damping_timescale.c', 'src/gas_dynamical_friction.c', 'src/gr.c', 'src/gravitational_harmonics.c', 'src/gr_full.c', 'src/gr_potential.c', 'src/inner_disk_edge.c', 'src/input.c', 'src/integrate_force.c', 'src/integrator_euler.c', 'src/integrator_implicit_midpoint.c', 'src/integrator_rk2.c', 'src/integrator_rk4.c', 'src/interpolation.c', 'src/lense_thirring.c', 'src/linkedlist.c', 'src/modify_mass.c', 'src/modify_orbits_direct.c', 'src/modify_orbits_forces.c', 'src/output.c', 'src/radiation_forces.c', 'src/rebxtools.c', 'src/steppers.c', 'src/stochastic_forces.c', 'src/tides_constant_time_lag.c', 'src/tides_dynamical.c', 'src/tides_spin.c', 'src/track_min_distance.c', 'src/type_I_migration.c', 'src/yarkovsky_effect.c'],
         
         self.library_dirs.append(rebdir+'/../')
         self.library_dirs.append(sitepackagesdir)
@@ -90,7 +90,7 @@ if FFP_CONTRACT_OFF:
     extra_compile_args.append('-ffp-contract=off')
 
 libreboundxmodule = Extension('libreboundx',
-        sources = [ 'src/integrator_implicit_midpoint.c', 'src/gravitational_harmonics.c', 'src/modify_mass.c', 'src/gas_damping_timescale.c', 'src/tides_spin.c', 'src/gr_potential.c', 'src/track_min_distance.c', 'src/modify_orbits_direct.c', 'src/integrator_euler.c', 'src/lense_thirring.c', 'src/inner_disk_edge.c', 'src/core.c', 'src/gr.c', 'src/type_I_migration.c', 'src/stochastic_forces.c', 'src/interpolation.c', 'src/exponential_migration.c', 'src/radiation_forces.c', 'src/integrate_force.c', 'src/central_force.c', 'src/integrator_rk4.c', 'src/gr_full.c', 'src/full_type_I.c', 'src/disk_profile.c', 'src/integrator_rk2.c', 'src/rebxtools.c', 'src/input.c', 'src/gas_dynamical_friction.c', 'src/yarkovsky_effect.c', 'src/steppers.c', 'src/modify_orbits_forces.c', 'src/linkedlist.c', 'src/tides_constant_time_lag.c', 'src/output.c'],
+        sources = [ 'src/central_force.c', 'src/core.c', 'src/exponential_migration.c', 'src/full_type_I.c', 'src/gas_damping_timescale.c', 'src/gas_dynamical_friction.c', 'src/gr.c', 'src/gravitational_harmonics.c', 'src/gr_full.c', 'src/gr_potential.c', 'src/inner_disk_edge.c', 'src/input.c', 'src/integrate_force.c', 'src/integrator_euler.c', 'src/integrator_implicit_midpoint.c', 'src/integrator_rk2.c', 'src/integrator_rk4.c', 'src/interpolation.c', 'src/lense_thirring.c', 'src/linkedlist.c', 'src/modify_mass.c', 'src/modify_orbits_direct.c', 'src/modify_orbits_forces.c', 'src/output.c', 'src/radiation_forces.c', 'src/rebxtools.c', 'src/steppers.c', 'src/stochastic_forces.c', 'src/tides_constant_time_lag.c', 'src/tides_dynamical.c', 'src/tides_spin.c', 'src/track_min_distance.c', 'src/type_I_migration.c', 'src/yarkovsky_effect.c'],
                     include_dirs = ['src'],
                     library_dirs = [],
                     runtime_library_dirs = ["."],
@@ -105,7 +105,7 @@ with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
 
 setup(name='reboundx',
-    version='4.4.1',
+    version='4.6.2',
     description='A library for including additional forces in REBOUND',
     long_description=long_description,
     url='https://github.com/dtamayo/reboundx',
@@ -136,9 +136,9 @@ setup(name='reboundx',
     keywords='astronomy astrophysics nbody integrator',
     packages=['reboundx'],
     cmdclass={'build_ext':build_ext},
-    setup_requires=['rebound>=4.0.0'],
-    install_requires=['rebound>=4.0.0'],
-    tests_require=['rebound>=4.0.0','numpy'],
+    setup_requires=['rebound>=4.6.0,<5.0.0'],
+    install_requires=['rebound>=4.6.0,<5.0.0'],
+    tests_require=['rebound>=4.6.0,<5.0.0','numpy'],
     test_suite="reboundx.test",
     ext_modules = [libreboundxmodule],
     zip_safe=False)
