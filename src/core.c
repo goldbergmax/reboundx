@@ -371,6 +371,7 @@ struct rebx_force* rebx_load_force(struct rebx_extras* const rebx, const char* n
     }
     else if (strcmp(name, "full_type_I") == 0){
         force->update_accelerations = rebx_modify_orbits_with_all_type_I_torques;
+        force->force_type = REBX_FORCE_VEL;
     }
     else if (strcmp(name, "tides_dynamical") == 0){
         force->update_accelerations = rebx_tides_dynamical;
